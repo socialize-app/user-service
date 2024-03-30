@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ConfigService, ConfigModule } from '@socialize-app/config';
+import { ConfigService, ConfigModule } from 'nest-redis-config';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 
 type Config = {
