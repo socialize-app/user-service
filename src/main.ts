@@ -2,19 +2,27 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService, ConfigModule } from 'nest-redis-config';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
+import { Logger } from '@nestjs/common';
 
 type Config = {
   port: number;
 };
 
 const retrieveConfig = async (): Promise<Config> => {
+  const logger = new Logger('retrieveConfig');
   const configModule = await NestFactory.create(ConfigModule.register());
   const configService = configModule.get(ConfigService);
-  const port = await configService.get('USER_SERVICE_PORT');
 
-  console.log('port:', port);
+  let port = await configService.get('USER_SERVICE_PORT');
 
-  configModule.close();
+  if (port == 0 || port == null) {
+    logger.warn(
+      'Port not found in cache, setting default port to USER_SERVICE_PORT environment variable.',
+    );
+    await configService.set('USER_SERVICE_PORT', process.env.USER_SERVICE_PORT);
+  }
+
+  port = await configService.get('USER_SERVICE_PORT');
 
   return {
     port: parseInt(port),
